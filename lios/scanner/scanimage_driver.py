@@ -33,13 +33,15 @@ class DriverScanimage(DriverBase):
 
 		device_info = subprocess.getoutput("scanimage -d {} --all-options"\
 		.format(self.device))		
-		
+		print("Parsing info")
 		for line in device_info.split("\n"):
+			print(line)
 			if ("--mode" in line):
+				 print("Parsing mode")
 				 self.available_modes = line.split()[1].split("|")
 				 print(self.available_modes)
 			
-			if ("--brightness" in line):
+			if ("--brightness" in line and not ("inactive" in line)):
 				self.light_parameter_state = True
 				self.light_parameter = "brightness"
 				print("Brightness available")
@@ -49,14 +51,17 @@ class DriverScanimage(DriverBase):
 			#	self.light_parameter = "threshold"
 			#	print("Threshold available")
 
-			if ("-y" in line):
-				self.max_y = line.split()[1].split(".")[2].split("mm")[0]
+			if ("-y" in line and "mm" in line):
+				print(f"Parsing y '{line}'")
+				self.max_y = line.split()[1].split("..")[1][:-2].split(".")[0]
 				print(self.max_y)
 
-			if ("-x" in line):
-				self.max_x = line.split()[1].split(".")[2].split("mm")[0]
+			if ("-x" in line and "mm" in line):
+				print(f"Parsing x '{line}'")
+				self.max_x = line.split()[1].split("..")[1][:-2].split(".")[0]
 				print(self.max_x)
 
+		print("Parsing finished")
 		super(DriverScanimage, self).__init__(device,scanner_mode_switching,
 			resolution,brightness,scan_area)
 		self.brightness_multiplier = 2
